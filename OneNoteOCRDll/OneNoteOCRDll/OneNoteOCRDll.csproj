@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="OCRText.cs" />
     <Compile Include="OneNoteOCR.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

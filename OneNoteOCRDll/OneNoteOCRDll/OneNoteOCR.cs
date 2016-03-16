@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -30,12 +31,24 @@ namespace OneNoteOCRDll
             a = null;
             Thread.Sleep(2000);
         }
+
         /// <summary>
         /// recognize text in image
         /// </summary>
-        /// <param name="ImagePath"></param>
+        /// <param name="imagePath"></param>
         /// <returns></returns>
-        public string RecognizeImage(string ImagePath)
+        public string RecognizeImage(string imagePath)
+        {
+            var doc = FromImage(imagePath);
+            var node = doc.Descendants().FirstOrDefault(t => t.Name.LocalName == "OCRText");
+            //return node?.Value;
+            if (node == null)
+                return null;
+            return node.Value;
+
+        }
+
+        private XDocument FromImage(string imagePath)
         {
             var a = new Application();
             string sections;
@@ -46,19 +59,57 @@ namespace OneNoteOCRDll
             var s = node.Attribute("ID").Value;
             string p;
             a.CreateNewPage(s, out p);
-            InsertImage(ImagePath, p);
+            InsertImage(imagePath, p);
             //update the note page 
             Thread.Sleep(2000);
             var str = "";
             a.GetPageContent(p, out str, PageInfo.piBasic, XMLSchema.xsCurrent);
             doc = XDocument.Parse(str);
-            node = doc.Descendants().First(t => t.Name.LocalName == "OCRText");
             a.DeleteHierarchy(p, deletePermanently: true);
-
             Marshal.ReleaseComObject(a);
+            return doc;
+        }
 
-            return node.Value;
+        private float AttributeToFloat(XElement node, string name)
+        {
+            return float.Parse(node.Attribute(name).Value);
+        }
 
+        /// <summary>
+        /// texts and rectangles
+        /// Rectangle is in point
+        /// To convert in pixel in a form
+        /// quote : https://msdn.microsoft.com/en-us/library/ms838191.aspx 
+        /// A point refers to a logical size (1/72 of a logical inch)
+        /// For WindowsForms
+        /// using(Graphics g = this.CreateGraphics()){
+        ///points = pixels* 72 / g.DpiX or DpiY;
+        ///
+        ///}
+        /// For not-windows forms: API GetDeviceCaps 
+        /// </summary>
+        /// <param name="imagePath"></param>
+        /// <returns></returns>
+        public IEnumerable<OCRText> OcrTexts(string imagePath)
+        {
+            var doc = FromImage(imagePath);
+            var node = doc.Descendants().FirstOrDefault(t => t.Name.LocalName == "OCRText");
+            if(node == null)
+                yield break;
+
+            var text = node.Value;
+            var tokens= doc.Descendants().Where(t => t.Name.LocalName == "OCRToken").ToArray();
+            for (int i = 0; i < tokens.Length; i++)
+            {
+                var ocr = new OCRText();
+                var token = tokens[i];
+                var startPos = (int)AttributeToFloat(token,"startPos");
+                var endPos = (int)(i < tokens.Length - 1 ? AttributeToFloat(tokens[i + 1],"startPos") : text.Length);
+                ocr.Text = text.Substring(startPos, endPos - startPos);
+                ocr.Rect=new RectangleF(AttributeToFloat(token,"x"), AttributeToFloat(token, "y"), AttributeToFloat(token, "width"), AttributeToFloat(token, "height"));
+                yield return ocr;
+            }
+            
         }
 
         void InsertImage(string pathImage, string existingPageId)
