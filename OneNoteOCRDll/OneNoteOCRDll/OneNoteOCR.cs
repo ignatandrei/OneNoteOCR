@@ -81,7 +81,7 @@ namespace OneNoteOCRDll
         /// To convert in pixel in a form
         /// quote : https://msdn.microsoft.com/en-us/library/ms838191.aspx 
         /// A point refers to a logical size (1/72 of a logical inch)
-        /// For WindowsForms
+        /// For WindowsForms 
         /// using(Graphics g = this.CreateGraphics()){
         ///points = pixels* 72 / g.DpiX or DpiY;
         ///
