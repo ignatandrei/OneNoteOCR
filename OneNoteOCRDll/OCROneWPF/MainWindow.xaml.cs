@@ -74,9 +74,10 @@ namespace OCROneWPF
             //src.EndInit();
             var src = FromImage(b) ;
             //var i = new Image();
-            image.Source = src;
-            
             //i.Stretch = Stretch.Fill;
+            image.Source = src;
+            //image.Stretch= Stretch.UniformToFill;
+            
 
             //int q = src.PixelHeight;        // Image loads here
             //Sp.Children.Add(i);
