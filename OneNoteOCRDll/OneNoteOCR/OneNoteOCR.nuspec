@@ -10,10 +10,10 @@
       <frameworkAssemblies>
          <frameworkAssembly assemblyName="System" targetFramework=".NETFramework4.0" />
       </frameworkAssemblies>
+      <license type="expression">MIT</license>
+      <projectUrl>https://github.com/ignatandrei/OneNoteOCR</projectUrl>   
       <!-- Optional metadata
       <owners></owners>
-      <license type="expression">MIT</license>
-      <projectUrl>https://github.com/ignatandrei/OneNoteOCR</projectUrl>
       <iconUrl></iconUrl>
       <copyright></copyright>
       <requireLicenseAcceptance>false</requireLicenseAcceptance>
